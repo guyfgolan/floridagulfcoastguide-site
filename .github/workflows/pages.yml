@@ -19,14 +19,15 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Unpack site
         run: |
           mkdir _site
           for z in $(ls site-part*.zip | sort -V); do unzip -o -q "$z" -d _site; done
           find _site -type f | wc -l
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: _site
       - id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
+
