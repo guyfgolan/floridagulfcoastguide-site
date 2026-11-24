@@ -1,5 +1,5 @@
 # Deploys the Florida Gulf Coast Guide site to GitHub Pages.
-# The site files live in site-part*.zip (exported from Guy's website draft). Higher-numbered parts overwrite lower ones, so an update is just a new part.
+# The site files live in site-part*.zip (exported from Guy's website draft). Higher-numbered parts overwrite lower ones.
 name: Deploy site to Pages
 on:
   push:
@@ -9,25 +9,30 @@ permissions:
   contents: read
   pages: write
   id-token: write
+  actions: read
 concurrency:
   group: pages
   cancel-in-progress: true
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v5
       - name: Unpack site
         run: |
           mkdir _site
           for z in $(ls site-part*.zip | sort -V); do unzip -o -q "$z" -d _site; done
+          rm -f _site/.part*-placeholder
           find _site -type f | wc -l
       - uses: actions/upload-pages-artifact@v5
         with:
           path: _site
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
       - id: deployment
         uses: actions/deploy-pages@v5
-
